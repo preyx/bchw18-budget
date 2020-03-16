@@ -16,6 +16,9 @@ const checkDatabase = () => {
           const transaction = db.transaction(['transaction'], 'readwrite')
           const store = transaction.objectStore('transaction')
           store.clear()
+          populateTotal()
+          populateTable()
+          populateChart()
         })
     }
   }
