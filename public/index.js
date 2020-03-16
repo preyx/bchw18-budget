@@ -29,7 +29,8 @@ const saveRecord = item => {
 
 request.onupgradeneeded = event => {
   db = event.target.result
-  db.createObjectStore('transaction')
+  const objectStore = db.createObjectStore('transaction', { autoIncrement: true })
+  objectStore.createIndex('transaction', 'transaction')
 }
 
 request.onsuccess = event => {
