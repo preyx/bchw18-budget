@@ -16,9 +16,21 @@ const checkDatabase = () => {
           const transaction = db.transaction(['transaction'], 'readwrite')
           const store = transaction.objectStore('transaction')
           store.clear()
-          populateTotal()
-          populateTable()
-          populateChart()
+          fetch('/api/transaction')
+            .then(response => {
+              return response.json()
+            })
+            .then(data => {
+              // save db data on global variable
+              transactions = data
+
+              populateTotal()
+              populateTable()
+              populateChart()
+            })
+            .catch(err => {
+              console.log(err)
+            })
         })
     }
   }
@@ -61,7 +73,6 @@ fetch('/api/transaction')
   })
   .catch(err => {
     console.log(err)
-    // fetch failed, so save in indexed db
   })
 
 function populateTotal () {
