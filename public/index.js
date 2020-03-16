@@ -1,5 +1,47 @@
 let transactions = []
 let myChart
+let db
+const request = indexedDB.open('transactDB', 1)
+
+const checkDatabase = () => {
+  const transaction = db.transaction(['transaction'], 'readwrite')
+  const store = transaction.objectStore('transaction')
+
+  const getAll = store.getAll()
+
+  getAll.onsuccess = () => {
+    if (getAll.result.length > 0) {
+      axios.post('/api/transaction/bulk', getAll.result)
+        .then(() => {
+          const transaction = db.transaction(['transaction'], 'readwrite')
+          const store = transaction.objectStore('transaction')
+          store.clear()
+        })
+    }
+  }
+}
+
+const saveRecord = item => {
+  const transaction = db.transaction(['transaction'], 'readwrite')
+  const store = transaction.objectStore('transaction')
+  store.add(item)
+}
+
+request.onupgradeneeded = event => {
+  db = event.target.result
+  db.createObjectStore('transaction')
+}
+
+request.onsuccess = event => {
+  db = event.target.result
+  if (navigator.onLine) {
+    checkDatabase()
+  }
+}
+
+request.onerror = event => {
+  console.log('db error')
+}
 
 fetch('/api/transaction')
   .then(response => {
@@ -12,6 +54,10 @@ fetch('/api/transaction')
     populateTotal()
     populateTable()
     populateChart()
+  })
+  .catch(err => {
+    console.log(err)
+    // fetch failed, so save in indexed db
   })
 
 function populateTotal () {
